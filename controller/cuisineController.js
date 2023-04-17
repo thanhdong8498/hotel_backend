@@ -33,6 +33,24 @@ const getListCusines = async (req, res) => {
         console.log(error);
     }
 };
+const getListFood = async (req, res) => {
+    try {
+        const food = await cuisineModel.find({ type: "food" }).exec();
+        return res.status(200).send(food);
+    } catch (error) {
+        //gửi mã lỗi để client refresh token
+        console.log(error);
+    }
+};
+const getListDrink = async (req, res) => {
+    try {
+        const drinks = await cuisineModel.find({ type: "drink" }).exec();
+        return res.status(200).send(drinks);
+    } catch (error) {
+        //gửi mã lỗi để client refresh token
+        console.log(error);
+    }
+};
 
 const getCuisineDetail = async (req, res) => {
     const cuisineId = req.params.id;
@@ -46,14 +64,13 @@ const deleteCuisine = async (req, res) => {
     const images = response.images.map((image) => "." + image);
     images.map((file) => {
         fs.unlinkSync(file);
-        console.log(`deleted ${file}`);
     });
     return res.status(200).send("Xóa thành công!");
 };
 const updateCuisine = async (req, res) => {
     const oldImage = req.body.oldImage;
     let oldFile;
-    console.log(oldFile);
+
     const cuisineId = req.params.id;
     const reqFiles = [];
     for (let i = 0; i < req.files.length; i++) {
@@ -63,7 +80,6 @@ const updateCuisine = async (req, res) => {
         oldFile = oldImage.map((image) => "." + image);
         oldFile.map((file) => {
             fs.unlinkSync(file);
-            console.log(`deleted ${file}`);
         });
     }
     if (reqFiles.length > 0) {
@@ -105,6 +121,8 @@ const updateCuisine = async (req, res) => {
 module.exports = {
     createCuisine,
     getListCusines,
+    getListFood,
+    getListDrink,
     getCuisineDetail,
     deleteCuisine,
     updateCuisine,

@@ -6,7 +6,7 @@ const createRoom = (req, res) => {
     for (let i = 0; i < req.files.length; i++) {
         reqFiles.push("/upload/room/" + req.files[i].filename);
     }
-    console.log(req.files);
+    
 
     const reqRoomStatus = [];
 
@@ -47,7 +47,7 @@ const createRoom = (req, res) => {
             res.status(400).json(`Error:${err}`);
             req.files.map((file) => {
                 fs.unlinkSync(file.path);
-                console.log(`deleted ${file.path}`);
+                
             });
         });
 };
@@ -55,7 +55,7 @@ const createRoom = (req, res) => {
 const editRoom = async (req, res, next) => {
     const oldImage = req.body.oldImage;
     let oldFile;
-    console.log(oldFile);
+    
     const roomId = req.params.id;
     const reqFiles = [];
     for (let i = 0; i < req.files.length; i++) {
@@ -82,7 +82,7 @@ const editRoom = async (req, res, next) => {
         oldFile = oldImage.map((image) => "." + image);
         oldFile.map((file) => {
             fs.unlinkSync(file);
-            console.log(`deleted ${file}`);
+            
         });
     }
     if (reqFiles.length > 0) {
@@ -178,7 +178,7 @@ const deleteRoom = async (req, res) => {
     const images = response.images.map((image) => "." + image);
     images.map((file) => {
         fs.unlinkSync(file);
-        console.log(`deleted ${file}`);
+        
     });
     return res.status(200).send("Xóa phòng thành công!");
 };
