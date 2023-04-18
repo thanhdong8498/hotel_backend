@@ -6,7 +6,6 @@ const createRoom = (req, res) => {
     for (let i = 0; i < req.files.length; i++) {
         reqFiles.push("/upload/room/" + req.files[i].filename);
     }
-    
 
     const reqRoomStatus = [];
 
@@ -47,7 +46,6 @@ const createRoom = (req, res) => {
             res.status(400).json(`Error:${err}`);
             req.files.map((file) => {
                 fs.unlinkSync(file.path);
-                
             });
         });
 };
@@ -55,7 +53,7 @@ const createRoom = (req, res) => {
 const editRoom = async (req, res, next) => {
     const oldImage = req.body.oldImage;
     let oldFile;
-    
+
     const roomId = req.params.id;
     const reqFiles = [];
     for (let i = 0; i < req.files.length; i++) {
@@ -82,7 +80,6 @@ const editRoom = async (req, res, next) => {
         oldFile = oldImage.map((image) => "." + image);
         oldFile.map((file) => {
             fs.unlinkSync(file);
-            
         });
     }
     if (reqFiles.length > 0) {
@@ -129,8 +126,19 @@ const editRoom = async (req, res, next) => {
 };
 
 const getRoomList = async (req, res) => {
+    console.log(req.query.sort);
+    let sort = req.query.sort || "title";
+    req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort]);
+
+    let sortBy = {};
+    if (sort[1]) {
+        sortBy[sort[0]] = sort[1];
+    } else {
+        sortBy[sort[0]] = "asc";
+    }
+
     try {
-        const rooms = await roomModel.find();
+        const rooms = await roomModel.find().sort(sortBy);
         return res.status(200).send(rooms);
     } catch (error) {
         //gửi mã lỗi để client refresh token
@@ -178,7 +186,6 @@ const deleteRoom = async (req, res) => {
     const images = response.images.map((image) => "." + image);
     images.map((file) => {
         fs.unlinkSync(file);
-        
     });
     return res.status(200).send("Xóa phòng thành công!");
 };
