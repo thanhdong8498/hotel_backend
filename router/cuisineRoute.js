@@ -49,7 +49,6 @@ router.get("/list", cuisineController.getListCusines);
 router.get("/food", cuisineController.getListFood);
 router.get("/drink", cuisineController.getListDrink);
 
-
 router.get("/detail/:id", cuisineController.getCuisineDetail);
 upload.array("images", 16),
     router.put(
