@@ -25,8 +25,17 @@ const createCuisine = (req, res, next) => {
 };
 
 const getListCusines = async (req, res) => {
+    let sort = req.query.sort || "title";
+    req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort]);
+
+    let sortBy = {};
+    if (sort[1]) {
+        sortBy[sort[0]] = sort[1];
+    } else {
+        sortBy[sort[0]] = "asc";
+    }
     try {
-        const cuisines = await cuisineModel.find();
+        const cuisines = await cuisineModel.find().sort(sortBy).exec();
         return res.status(200).send(cuisines);
     } catch (error) {
         //gửi mã lỗi để client refresh token
@@ -34,8 +43,17 @@ const getListCusines = async (req, res) => {
     }
 };
 const getListFood = async (req, res) => {
+    let sort = req.query.sort || "title";
+    req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort]);
+
+    let sortBy = {};
+    if (sort[1]) {
+        sortBy[sort[0]] = sort[1];
+    } else {
+        sortBy[sort[0]] = "asc";
+    }
     try {
-        const food = await cuisineModel.find({ type: "food" }).exec();
+        const food = await cuisineModel.find({ type: "food" }).sort(sortBy).exec();
         return res.status(200).send(food);
     } catch (error) {
         //gửi mã lỗi để client refresh token

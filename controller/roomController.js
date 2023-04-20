@@ -147,8 +147,17 @@ const getRoomList = async (req, res) => {
 };
 
 const getRoomSingle = async (req, res) => {
+    let sort = req.query.sort || "title";
+    req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort]);
+
+    let sortBy = {};
+    if (sort[1]) {
+        sortBy[sort[0]] = sort[1];
+    } else {
+        sortBy[sort[0]] = "asc";
+    }
     try {
-        const singleRoom = await roomModel.find({ roomType: "single" }).exec();
+        const singleRoom = await roomModel.find({ roomType: "single" }).sort(sortBy).exec();
         return res.status(200).send(singleRoom);
     } catch (error) {
         //gửi mã lỗi để client refresh token
@@ -156,17 +165,35 @@ const getRoomSingle = async (req, res) => {
     }
 };
 const getRoomDouble = async (req, res) => {
+    let sort = req.query.sort || "title";
+    req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort]);
+
+    let sortBy = {};
+    if (sort[1]) {
+        sortBy[sort[0]] = sort[1];
+    } else {
+        sortBy[sort[0]] = "asc";
+    }
     try {
-        const singleRoom = await roomModel.find({ roomType: "double" }).exec();
-        return res.status(200).send(singleRoom);
+        const doubleRoom = await roomModel.find({ roomType: "double" }).sort(sortBy).exec();
+        return res.status(200).send(doubleRoom);
     } catch (error) {
         //gửi mã lỗi để client refresh token
         console.log(error);
     }
 };
 const getRoomVip = async (req, res) => {
+    let sort = req.query.sort || "title";
+    req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort]);
+
+    let sortBy = {};
+    if (sort[1]) {
+        sortBy[sort[0]] = sort[1];
+    } else {
+        sortBy[sort[0]] = "asc";
+    }
     try {
-        const vipRoom = await roomModel.find({ roomType: "vip" }).exec();
+        const vipRoom = await roomModel.find({ roomType: "vip" }).sort(sortBy).exec();
         return res.status(200).send(vipRoom);
     } catch (error) {
         //gửi mã lỗi để client refresh token
