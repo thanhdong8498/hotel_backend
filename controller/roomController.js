@@ -126,7 +126,7 @@ const editRoom = async (req, res, next) => {
 };
 
 const getRoomList = async (req, res) => {
-    console.log(req.query.sort);
+    
     let sort = req.query.sort || "title";
     req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort]);
 

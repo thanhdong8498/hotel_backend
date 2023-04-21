@@ -6,6 +6,7 @@ const authRoute = require("./router/authRoute");
 const cuisineRoute = require("./router/cuisineRoute");
 const searchRoute = require("./router/searchRoute");
 const bookingRoute = require("./router/bookingRoute");
+const orderRoute = require("./router/orderRoute");
 const connectDb = require("./services/connectDBService");
 const cors = require("cors");
 
@@ -27,6 +28,7 @@ app.use("/api/room", roomRoute);
 app.use("/api/cuisine", cuisineRoute);
 app.use("/search", searchRoute);
 app.use("/api/booking", bookingRoute);
+app.use("/api/order", orderRoute);
 
 app.listen(process.env.PORT, () => {
     console.log(`Server started on port ${process.env.PORT}`);

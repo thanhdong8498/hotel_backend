@@ -23,7 +23,7 @@ const isAdmin = async (req, res, next) => {
         const userId = req.userId;
         const user = await userModel.findById(userId);
         // role is admin
-        if (user.role === "admin") {
+        if (user.role === "admin" || user.role === "subadmin") {
             next();
         }
     } catch (error) {
