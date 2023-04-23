@@ -1,4 +1,5 @@
 const galleryModel = require("../models/galleryModel");
+const fs = require("fs");
 
 const createGallery = async (req, res) => {
     const reqFiles = [];
@@ -33,8 +34,36 @@ const createGallery = async (req, res) => {
     }
 };
 const getListImages = async (req, res) => {
-    
+    const response = await galleryModel.find();
+
+    if (response.length > 0) {
+        res.send(response[0].images);
+    } else {
+        res.send([]);
+    }
+};
+const deleteImages = async (req, res) => {
+    let gallery = [];
+    let id;
+    const image = req.body.path;
+    const imageRemove = "." + image;
+    console.log(image);
+
+    const oldGallery = await galleryModel.find();
+    if (oldGallery.length > 0) {
+        gallery = oldGallery[0].images;
+        id = oldGallery[0]._id;
+    }
+    const newGallery = gallery.filter((item) => {
+        return item !== image;
+    });
+    console.log(newGallery);
+    await galleryModel.findByIdAndUpdate(id, { images: newGallery }, { new: true });
+    res.send("delete image succesfully!");
+    fs.unlinkSync(imageRemove);
 };
 module.exports = {
     createGallery,
+    getListImages,
+    deleteImages,
 };

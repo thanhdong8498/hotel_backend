@@ -41,8 +41,16 @@ router.post(
     "/create",
     jsonParser,
     urlencodedParser,
-    // [authMiddleware.isAuthentication, authMiddleware.isAdmin],
+    [authMiddleware.isAuthentication, authMiddleware.isAdmin],
     upload.array("images", 16),
     galleryController.createGallery
+);
+router.get("/list", galleryController.getListImages);
+router.put(
+    "/delete",
+    jsonParser,
+    urlencodedParser,
+    [authMiddleware.isAuthentication, authMiddleware.isAdmin],
+    galleryController.deleteImages
 );
 module.exports = router;
