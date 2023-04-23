@@ -17,6 +17,7 @@ const createOrder = async (req, res) => {
             userId: req.userId,
             isAccept: false,
             isDelivery: false,
+            isCancelled: false,
             cover: cuisine.images[0],
         });
         res.send("order success");
@@ -47,4 +48,9 @@ const deliveriedOrder = async (req, res) => {
     await orderModel.findByIdAndUpdate(orderId, { isDelivery: true }, { new: true });
     res.send("xác nhận đã giao thành công");
 };
-module.exports = { createOrder, getListOrder, getUserOrder, acceptOrder, deliveriedOrder };
+const cancelOrder = async (req, res) => {
+    const orderId = req.params.id;
+    await orderModel.findByIdAndUpdate(orderId, { isCancelled: true }, { new: true });
+    res.send("xác nhận hủy thành công");
+};
+module.exports = { createOrder, getListOrder, getUserOrder, acceptOrder, deliveriedOrder,cancelOrder };

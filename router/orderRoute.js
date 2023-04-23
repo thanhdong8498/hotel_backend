@@ -30,5 +30,12 @@ router.put(
     [authMiddleware.isAuthentication, authMiddleware.isAdmin],
     orderController.deliveriedOrder
 );
+router.put(
+    "/cancelled/:id",
+    jsonParser,
+    urlencodedParser,
+    [authMiddleware.isAuthentication],
+    orderController.cancelOrder
+);
 
 module.exports = router;
