@@ -15,6 +15,40 @@ router.post(
     bookingController.createBooking
 );
 router.get("/list", bookingController.getListBookings);
-router.put("/checkout/:id", jsonParser, urlencodedParser, bookingController.checkOutBookings);
+router.put(
+    "/checkout/:id",
+    jsonParser,
+    urlencodedParser,
+    [authMiddleware.isAuthentication, authMiddleware.isAdmin],
+    bookingController.checkOutBookings
+);
+router.put(
+    "/cancelled/:id",
+    jsonParser,
+    urlencodedParser,
+    [authMiddleware.isAuthentication],
+    bookingController.cancelledBooking
+);
+router.put(
+    "/delivery/:id",
+    jsonParser,
+    urlencodedParser,
+    [authMiddleware.isAuthentication],
+    bookingController.roomDelivery
+);
+router.get(
+    "/user/",
+    jsonParser,
+    urlencodedParser,
+    [authMiddleware.isAuthentication],
+    bookingController.getUserListBooking
+);
+router.get(
+    "/detail/:id",
+    jsonParser,
+    urlencodedParser,
+    [authMiddleware.isAuthentication, authMiddleware.isAdmin],
+    bookingController.getBookingDetail
+);
 
 module.exports = router;

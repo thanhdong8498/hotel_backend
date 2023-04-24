@@ -43,7 +43,7 @@ const createRoom = (req, res) => {
             res.json("new room added!");
         })
         .catch((err) => {
-            res.status(400).json(`Error:${err}`);
+            res.status(201).json(`Error:${err}`);
             req.files.map((file) => {
                 fs.unlinkSync(file.path);
             });
@@ -126,7 +126,6 @@ const editRoom = async (req, res, next) => {
 };
 
 const getRoomList = async (req, res) => {
-    
     let sort = req.query.sort || "title";
     req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort]);
 
