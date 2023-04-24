@@ -47,7 +47,7 @@ const deleteImages = async (req, res) => {
     let id;
     const image = req.body.path;
     const imageRemove = "." + image;
-    console.log(image);
+    
 
     const oldGallery = await galleryModel.find();
     if (oldGallery.length > 0) {
@@ -57,7 +57,7 @@ const deleteImages = async (req, res) => {
     const newGallery = gallery.filter((item) => {
         return item !== image;
     });
-    console.log(newGallery);
+    
     await galleryModel.findByIdAndUpdate(id, { images: newGallery }, { new: true });
     res.send("delete image succesfully!");
     fs.unlinkSync(imageRemove);
