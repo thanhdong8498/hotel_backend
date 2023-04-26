@@ -8,18 +8,17 @@ const getRevenue = async (req, res) => {
     const order = await orderModel.find({
         isDelivery: true,
     });
+    console.log(booking);
     console.log(moment(new Date()).format("DD/MM/YYYY"));
     const bookingRevenue = booking.map((item) => item.summaryPrice).reduce((prev, current) => prev + current);
     const orderRevenue = order.map((item) => item.totalPrice).reduce((prev, current) => prev + current);
     const totalRevenue = bookingRevenue + orderRevenue;
     const todayOrder = order.filter((item) => {
-        console.log(moment(item.updatedAt).format("DD/MM/YYYY"));
-
-        return moment(item.updatedAt).format("DD/MM/YYYY") === moment(new Date()).format("DD/MM/YYYY");
+        return moment(item.createdAt).format("DD/MM/YYYY") === moment(new Date()).format("DD/MM/YYYY");
     });
     const todayBooking = booking.filter((item) => {
-        console.log(moment(item.updatedAt).format("DD/MM/YYYY"));
-        return moment(item.updatedAt).format("DD/MM/YYYY") === moment(new Date()).format("DD/MM/YYYY");
+        console.log(moment(item.createdAt).format("DD/MM/YYYY"));
+        return moment(item.createdAt).format("DD/MM/YYYY") === moment(new Date()).format("DD/MM/YYYY");
     });
     const todayBookingRevenue =
         todayBooking.length > 0
