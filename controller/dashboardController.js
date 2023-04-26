@@ -16,6 +16,7 @@ const getRevenue = async (req, res) => {
         return moment(item.updatedAt).format("DD/MM/YYYY") === moment(new Date()).format("DD/MM/YYYY");
     });
     const todayBooking = booking.filter((item) => {
+        console.log(moment(item.updatedAt).format("DD/MM/YYYY"));
         return moment(item.updatedAt).format("DD/MM/YYYY") === moment(new Date()).format("DD/MM/YYYY");
     });
     const todayBookingRevenue =
