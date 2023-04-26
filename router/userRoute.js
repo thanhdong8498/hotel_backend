@@ -6,7 +6,6 @@ const bodyParser = require("body-parser");
 const jsonParser = bodyParser.json();
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
-
 router.get("/user", [authMiddleware.isAuthentication], userController.getListUsers);
 
 router.delete(
@@ -15,6 +14,26 @@ router.delete(
     userController.deleteUser
 );
 
-router.put("/user/update/:userId",  jsonParser, urlencodedParser,userController.updateUser);
+router.put(
+    "/user/update/:userId",
+    jsonParser,
+    urlencodedParser,
+    [authMiddleware.isAuthentication, authMiddleware.isAdmin],
+    userController.updateUser
+);
+router.put(
+    "/user/update",
+    jsonParser,
+    urlencodedParser,
+    [authMiddleware.isAuthentication],
+    userController.userUpdateInfo
+);
+router.put(
+    "/user/passwordchange",
+    jsonParser,
+    urlencodedParser,
+    [authMiddleware.isAuthentication],
+    userController.userChangePassword
+);
 
 module.exports = router;
