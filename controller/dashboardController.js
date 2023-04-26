@@ -13,6 +13,8 @@ const getRevenue = async (req, res) => {
     const orderRevenue = order.map((item) => item.totalPrice).reduce((prev, current) => prev + current);
     const totalRevenue = bookingRevenue + orderRevenue;
     const todayOrder = order.filter((item) => {
+        console.log(moment(item.updatedAt).format("DD/MM/YYYY"));
+
         return moment(item.updatedAt).format("DD/MM/YYYY") === moment(new Date()).format("DD/MM/YYYY");
     });
     const todayBooking = booking.filter((item) => {
