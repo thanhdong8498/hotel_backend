@@ -43,10 +43,11 @@ const { Server } = require("socket.io");
 const io = new Server({
     pingTimeout: 60000,
     cors: {
-        origin: "http://localhost:3000",
+        origin: "https://hotel-frontend-ntd.vercel.app/",
     },
 });
 io.on("connection", (socket) => {
+    console.log('connected to socket.io');
     socket.on("ordered", () => {
         io.emit("updateadminorder");
     });
