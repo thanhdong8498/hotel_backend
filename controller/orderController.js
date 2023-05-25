@@ -34,7 +34,6 @@ const getListOrder = async (req, res) => {
     }
 };
 const getUserOrder = async (req, res) => {
-    console.log(req.userId);
     const userOrder = await orderModel.find({ userId: req.userId });
     res.send(userOrder);
 };

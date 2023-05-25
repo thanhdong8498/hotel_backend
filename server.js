@@ -39,3 +39,40 @@ app.use("/api/dashboard", dashboardRoute);
 app.listen(process.env.PORT, () => {
     console.log(`Server started on port ${process.env.PORT}`);
 });
+const { Server } = require("socket.io");
+const io = new Server({
+    pingTimeout: 60000,
+    cors: {
+        origin: "http://localhost:3000",
+    },
+});
+io.on("connection", (socket) => {
+    socket.on("ordered", () => {
+        io.emit("updateadminorder");
+    });
+    socket.on("accept", () => {
+        io.emit("updateuserorder");
+    });
+    socket.on("booked", () => {
+        io.emit("updatedetail");
+    });
+    socket.on("deliveried", () => {
+        io.emit("updateuserorder");
+    });
+    socket.on("adminbookingcanceled", () => {
+        io.emit("updateuserbooking");
+    });
+    socket.on("checkedout", () => {
+        io.emit("updateuserbooking");
+    });
+    socket.on("roomdeliveried", () => {
+        io.emit("updateuserbooking");
+    });
+    socket.on("userbookingcancelled", () => {
+        io.emit("updatedetail");
+    });
+    socket.on("usercancelledorder", () => {
+        io.emit("updateadminorder");
+    });
+});
+io.listen(5000);

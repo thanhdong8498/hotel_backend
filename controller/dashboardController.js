@@ -8,7 +8,6 @@ const getRevenue = async (req, res) => {
     const order = await orderModel.find({
         isDelivery: true,
     });
-    console.log(booking);
     const bookingRevenue = booking.map((item) => item.summaryPrice).reduce((prev, current) => prev + current);
     const orderRevenue = order.map((item) => item.totalPrice).reduce((prev, current) => prev + current);
     const totalRevenue = bookingRevenue + orderRevenue;

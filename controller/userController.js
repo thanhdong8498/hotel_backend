@@ -48,14 +48,12 @@ const userUpdateInfo = async (req, res) => {
     } catch (error) {}
 };
 const userChangePassword = async (req, res) => {
-    console.log("change pass");
     const userId = req.userId;
     const oldPassword = req.body.oldPass;
     const newPassword = req.body.newPass;
     try {
         const user = await userModel.findById(userId);
         const isPassword = bcrypt.compareSync(oldPassword, user.password);
-        console.log(isPassword);
         if (isPassword) {
             await userModel.updateOne({ _id: userId }, { $set: { password: bcrypt.hashSync(newPassword) } });
             res.status(200).send("Update user successfully");
