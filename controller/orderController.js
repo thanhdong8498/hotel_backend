@@ -44,6 +44,13 @@ const acceptOrder = async (req, res) => {
 };
 const deliveriedOrder = async (req, res) => {
     const orderId = req.params.id;
+    const order = await orderModel.findById(orderId);
+    const quantity = order.quantity;
+    const cusineId = order.cuisineId;
+    const cuisine = await cuisineModel.findById(cusineId);
+    const oldOrderCount = cuisine.orderCount;
+    const newOrderCount = oldOrderCount + quantity;
+    await cuisineModel.findByIdAndUpdate(cusineId, { orderCount: newOrderCount }, { new: true });
     await orderModel.findByIdAndUpdate(orderId, { isDelivery: true }, { new: true });
     res.send("xác nhận đã giao thành công");
 };
@@ -52,4 +59,4 @@ const cancelOrder = async (req, res) => {
     await orderModel.findByIdAndUpdate(orderId, { isCancelled: true }, { new: true });
     res.send("xác nhận hủy thành công");
 };
-module.exports = { createOrder, getListOrder, getUserOrder, acceptOrder, deliveriedOrder,cancelOrder };
+module.exports = { createOrder, getListOrder, getUserOrder, acceptOrder, deliveriedOrder, cancelOrder };

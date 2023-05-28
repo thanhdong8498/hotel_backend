@@ -36,6 +36,7 @@ const createRoom = (req, res) => {
         cover: reqFiles[0],
         images: reqFiles,
         description: req.body.description,
+        bookingCount: 0,
     });
     newRoomModel
         .save()
@@ -126,16 +127,16 @@ const editRoom = async (req, res, next) => {
 };
 
 const getRoomList = async (req, res) => {
-    let sort = req.query.sort || "title";
+    let sort = req.query.sort ? req.query.sort : "bookingCount";
     req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort]);
 
     let sortBy = {};
     if (sort[1]) {
         sortBy[sort[0]] = sort[1];
     } else {
-        sortBy[sort[0]] = "asc";
+        sortBy[sort[0]] = "desc";
     }
-
+    console.log(sortBy);
     try {
         const rooms = await roomModel.find().sort(sortBy);
         return res.status(200).send(rooms);

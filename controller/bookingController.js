@@ -74,7 +74,8 @@ const checkOutBookings = async (req, res) => {
 
     const oldRoom = await roomModel.findById(roomId);
     let oldRoomStatus = oldRoom.roomStatus;
-
+    let bookingCount = oldRoom.bookingCount;
+    let newBookingCount = bookingCount + roomNo.length;
     let arr;
 
     for (let i = 0; i < reqRoomStatus.length; i++) {
@@ -84,7 +85,11 @@ const checkOutBookings = async (req, res) => {
         oldRoomStatus = arr;
     }
     const newRoomStatus = [...arr, ...reqRoomStatus];
-    await roomModel.findByIdAndUpdate(roomId, { roomStatus: newRoomStatus }, { new: true });
+    await roomModel.findByIdAndUpdate(
+        roomId,
+        { roomStatus: newRoomStatus, bookingCount: newBookingCount },
+        { new: true }
+    );
     res.send("Trả phòng thành công!");
 };
 const getUserListBooking = async (req, res) => {

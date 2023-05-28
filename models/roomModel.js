@@ -18,6 +18,7 @@ const roomSchema = new mongoose.Schema({
     cover: String,
     images: [String],
     description: String,
+    bookingCount: Number,
 });
 
 const roomModel = mongoose.model("room", roomSchema);

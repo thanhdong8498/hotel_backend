@@ -25,15 +25,16 @@ const createCuisine = (req, res, next) => {
 };
 
 const getListCusines = async (req, res) => {
-    let sort = req.query.sort || "title";
+    let sort = req.query.sort != null ? req.query.sort : "orderCount";
     req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort]);
-
     let sortBy = {};
+
     if (sort[1]) {
         sortBy[sort[0]] = sort[1];
     } else {
-        sortBy[sort[0]] = "asc";
+        sortBy[sort[0]] = "desc";
     }
+    console.log(sortBy);
     try {
         const cuisines = await cuisineModel.find().sort(sortBy).exec();
         return res.status(200).send(cuisines);
@@ -43,14 +44,14 @@ const getListCusines = async (req, res) => {
     }
 };
 const getListFood = async (req, res) => {
-    let sort = req.query.sort || "title";
+    let sort = req.query.sort || "orderCount";
     req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort]);
 
     let sortBy = {};
     if (sort[1]) {
         sortBy[sort[0]] = sort[1];
     } else {
-        sortBy[sort[0]] = "asc";
+        sortBy[sort[0]] = "desc";
     }
     try {
         const food = await cuisineModel.find({ type: "food" }).sort(sortBy).exec();
@@ -61,8 +62,17 @@ const getListFood = async (req, res) => {
     }
 };
 const getListDrink = async (req, res) => {
+    let sort = req.query.sort || "orderCount";
+    req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort]);
+
+    let sortBy = {};
+    if (sort[1]) {
+        sortBy[sort[0]] = sort[1];
+    } else {
+        sortBy[sort[0]] = "desc";
+    }
     try {
-        const drinks = await cuisineModel.find({ type: "drink" }).exec();
+        const drinks = await cuisineModel.find({ type: "drink" }).sort(sortBy).exec();
         return res.status(200).send(drinks);
     } catch (error) {
         //gửi mã lỗi để client refresh token

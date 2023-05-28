@@ -12,7 +12,7 @@ const galleryRoute = require("./router/galleryRoute");
 const dashboardRoute = require("./router/dashboardRoute");
 const connectDb = require("./services/connectDBService");
 const cors = require("cors");
-const { createServer } = require("http");
+
 const app = express();
 
 require("dotenv").config();
@@ -39,16 +39,17 @@ app.use("/api/dashboard", dashboardRoute);
 app.listen(process.env.PORT, () => {
     console.log(`Server started on port ${process.env.PORT}`);
 });
-const httpServer = createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(httpServer, {
-    pingTimeout: 60000,
+const httpServer = require("http").createServer();
+const io = require("socket.io")(httpServer, {
     cors: {
         origin: "https://hotel-frontend-ntd.vercel.app/",
+        methods: ["GET", "POST"],
     },
 });
+
+httpServer.listen(5000);
 io.on("connection", (socket) => {
-    console.log("connected to socket.io");
+    console.log("connect to socket.io");
     socket.on("ordered", () => {
         io.emit("updateadminorder");
     });
@@ -77,4 +78,3 @@ io.on("connection", (socket) => {
         io.emit("updateadminorder");
     });
 });
-httpServer.listen(5000);
