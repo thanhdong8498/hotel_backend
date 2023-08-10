@@ -8,7 +8,7 @@ module.exports = {
     init: (httpServer) => {
         io = socketIO(httpServer, {
             cors: {
-                origin: "https://hotel-frontend-ntd.vercel.app/",
+                origin: "https://hotel-frontend-ntd.vercel.app",
                 methods: ["GET", "POST"],
             },
         });
