@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const roomStatusSchema = new mongoose.Schema({
     roomNo: { type: "String", unique: true },
-    isBooked: Boolean,
+    bookedDate: [String],
     _id: { type: "String", unique: true },
 });
 

@@ -32,7 +32,6 @@ const updateUser = async (req, res) => {
                 email: req.body.email,
                 phone: req.body.phone,
                 role: req.body.role,
-                password: bcrypt.hashSync(req.body.password, 10),
             },
             { new: true }
         );

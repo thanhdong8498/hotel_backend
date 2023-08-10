@@ -1,5 +1,5 @@
 const express = require("express");
-
+const socketSetup = require("./utils/socket");
 const userRoute = require("./router/userRoute");
 const roomRoute = require("./router/roomRoute");
 const authRoute = require("./router/authRoute");
@@ -10,6 +10,7 @@ const orderRoute = require("./router/orderRoute");
 const contactRoute = require("./router/contactRoute");
 const galleryRoute = require("./router/galleryRoute");
 const dashboardRoute = require("./router/dashboardRoute");
+const userNotificationRoute = require("./router/userNotificationRoute");
 const connectDb = require("./services/connectDBService");
 const cors = require("cors");
 
@@ -35,46 +36,11 @@ app.use("/api/order", orderRoute);
 app.use("/api/contact", contactRoute);
 app.use("/api/gallery", galleryRoute);
 app.use("/api/dashboard", dashboardRoute);
+app.use("/api/userNotification", userNotificationRoute);
 
-app.listen(process.env.PORT, () => {
-    console.log(`Server started on port ${process.env.PORT}`);
-});
-const httpServer = require("http").createServer();
-const io = require("socket.io")(httpServer, {
-    cors: {
-        origin: "https://hotel-frontend-ntd.vercel.app/",
-        methods: ["GET", "POST"],
-    },
-});
+const httpServer = require("http").createServer(app);
+const io = socketSetup.init(httpServer);
 
-httpServer.listen(5000);
-io.on("connection", (socket) => {
-    console.log("connect to socket.io");
-    socket.on("ordered", () => {
-        io.emit("updateadminorder");
-    });
-    socket.on("accept", () => {
-        io.emit("updateuserorder");
-    });
-    socket.on("booked", () => {
-        io.emit("updatedetail");
-    });
-    socket.on("deliveried", () => {
-        io.emit("updateuserorder");
-    });
-    socket.on("adminbookingcanceled", () => {
-        io.emit("updateuserbooking");
-    });
-    socket.on("checkedout", () => {
-        io.emit("updateuserbooking");
-    });
-    socket.on("roomdeliveried", () => {
-        io.emit("updateuserbooking");
-    });
-    socket.on("userbookingcancelled", () => {
-        io.emit("updatedetail");
-    });
-    socket.on("usercancelledorder", () => {
-        io.emit("updateadminorder");
-    });
+httpServer.listen(process.env.PORT, () => {
+    console.log(`Server đã khởi động trên cổng ${process.env.PORT}`);
 });

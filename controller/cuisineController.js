@@ -34,7 +34,7 @@ const getListCusines = async (req, res) => {
     } else {
         sortBy[sort[0]] = "desc";
     }
-    console.log(sortBy);
+
     try {
         const cuisines = await cuisineModel.find().sort(sortBy).exec();
         return res.status(200).send(cuisines);

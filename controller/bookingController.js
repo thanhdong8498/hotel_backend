@@ -1,9 +1,24 @@
 const bookingModel = require("../models/bookingModel");
 const roomModel = require("../models/roomModel");
+const userModel = require("../models/userModel");
+const userNotificationModel = require("../models/userNotificationModel");
+const moment = require("moment-timezone");
+const { getIO } = require("../utils/socket");
+
+function getDatesInRange(startDate, endDate) {
+    const date = new Date(startDate.getTime());
+    const dates = [];
+    while (date <= endDate) {
+        dates.push(moment(date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY"));
+        date.setDate(date.getDate() + 1);
+    }
+    return dates;
+}
 
 const createBooking = async (req, res) => {
     const roomId = req.body.roomId;
     room = await roomModel.findById(roomId);
+
     try {
         bookingModel.create({
             fullname: req.body.fullname,
@@ -21,28 +36,25 @@ const createBooking = async (req, res) => {
             isCancelled: false,
             isReceived: false,
         });
-        const reqRoomStatus = [];
-        for (let i = 0; i < req.body.roomNo.length; i++) {
-            reqRoomStatus.push({
-                roomNo: req.body.roomNo[i],
-                isBooked: true,
-                _id: req.body.roomNo[i],
-            });
-        }
 
         const oldRoom = await roomModel.findById(roomId);
+
         let oldRoomStatus = oldRoom.roomStatus;
+        const index = oldRoomStatus.findIndex((x) => x._id === req.body.roomNo[0]);
+        oldRoomStatus[index].bookedDate = oldRoomStatus[index].bookedDate.concat(
+            getDatesInRange(new Date(req.body.receiveDate.toString()), new Date(req.body.checkoutDate.toString()))
+        );
 
-        let arr;
-
-        for (let i = 0; i < reqRoomStatus.length; i++) {
-            arr = oldRoomStatus.filter((room) => {
-                return room.roomNo !== reqRoomStatus[i].roomNo;
-            });
-            oldRoomStatus = arr;
-        }
-        const newRoomStatus = [...arr, ...reqRoomStatus];
-        await roomModel.findByIdAndUpdate(roomId, { roomStatus: newRoomStatus }, { new: true });
+        await roomModel.findByIdAndUpdate(roomId, { roomStatus: oldRoomStatus }, { new: true });
+        userNotificationModel.create({
+            userId: req.userId,
+            message: `Bạn đã gửi yêu cầu đặt ${room.title} số ${req.body.roomNo.toString()} thành công!`,
+            image: room.cover,
+        });
+        const user = await userModel.findOne({ _id: req.userId });
+        const socketId = user.socketId;
+        const io = getIO(); // Lấy đối tượng io
+        io.to(socketId).emit("notification");
         return res.status(200).send("booking successfully!");
     } catch (error) {
         console.log(error);
@@ -60,38 +72,51 @@ const getListBookings = async (req, res) => {
 const checkOutBookings = async (req, res) => {
     const bookingId = req.params.id;
     const booking = await bookingModel.findById(bookingId);
+    if (!booking) {
+        return res.status(404).send("Booking not found");
+    }
+
     await bookingModel.findByIdAndUpdate(bookingId, { isCheckedOut: true });
+
     const roomId = booking.roomId;
     const roomNo = booking.roomNo;
-    const reqRoomStatus = [];
-    for (let i = 0; i < roomNo.length; i++) {
-        reqRoomStatus.push({
-            roomNo: roomNo[i],
-            isBooked: false,
-            _id: roomNo[i],
-        });
-    }
 
-    const oldRoom = await roomModel.findById(roomId);
-    let oldRoomStatus = oldRoom.roomStatus;
-    let bookingCount = oldRoom.bookingCount;
-    let newBookingCount = bookingCount + roomNo.length;
-    let arr;
+    const room = await roomModel.findById(roomId);
+    const roomStatus = room.roomStatus;
 
-    for (let i = 0; i < reqRoomStatus.length; i++) {
-        arr = oldRoomStatus.filter((room) => {
-            return room.roomNo !== reqRoomStatus[i].roomNo;
-        });
-        oldRoomStatus = arr;
-    }
-    const newRoomStatus = [...arr, ...reqRoomStatus];
+    const receiveDate = booking.receiveDate;
+    const checkoutDate = booking.checkoutDate;
+    const bookedDates = getDatesInRange(new Date(receiveDate), new Date(checkoutDate));
+
+    const updatedRoomStatus = roomStatus.map((status) => {
+        if (status.roomNo && status.bookedDate && roomNo.includes(status.roomNo)) {
+            const newBookedDate = status.bookedDate.filter((date) => !bookedDates.includes(date));
+            return {
+                roomNo: status.roomNo,
+                bookedDate: newBookedDate,
+                _id: status.roomNo,
+            };
+        } else {
+            return status;
+        }
+    });
+
+    const bookingCount = room.bookingCount;
+    const newBookingCount = bookingCount + roomNo.length;
+
     await roomModel.findByIdAndUpdate(
         roomId,
-        { roomStatus: newRoomStatus, bookingCount: newBookingCount },
+        { roomStatus: updatedRoomStatus, bookingCount: newBookingCount },
         { new: true }
     );
+    userNotificationModel.create({
+        userId: booking.userId,
+        image: room.cover,
+        message: `Bạn đã trả ${room.title} số ${booking.roomNo.toString()} thành công!`,
+    });
     res.send("Trả phòng thành công!");
 };
+
 const getUserListBooking = async (req, res) => {
     const userId = req.userId;
     const userBooking = await bookingModel.find({ userId: userId });
@@ -100,36 +125,62 @@ const getUserListBooking = async (req, res) => {
 const cancelledBooking = async (req, res) => {
     const bookingId = req.params.id;
     const booking = await bookingModel.findById(bookingId);
+    if (!booking) {
+        return res.status(404).send("Booking not found");
+    }
+
     await bookingModel.findByIdAndUpdate(bookingId, { isCancelled: true });
+
     const roomId = booking.roomId;
-    const roomNo = booking.roomNo;
-    const reqRoomStatus = [];
-    for (let i = 0; i < roomNo.length; i++) {
-        reqRoomStatus.push({
-            roomNo: roomNo[i],
-            isBooked: false,
-            _id: roomNo[i],
-        });
-    }
+    const receiveDate = booking.receiveDate;
+    const checkoutDate = booking.checkoutDate;
 
-    const oldRoom = await roomModel.findById(roomId);
-    let oldRoomStatus = oldRoom.roomStatus;
+    // Get an array of booked dates between receiveDate and checkoutDate
+    const bookedDates = getDatesInRange(new Date(receiveDate), new Date(checkoutDate));
 
-    let arr;
+    const room = await roomModel.findById(roomId);
+    const roomStatus = room.roomStatus;
 
-    for (let i = 0; i < reqRoomStatus.length; i++) {
-        arr = oldRoomStatus.filter((room) => {
-            return room.roomNo !== reqRoomStatus[i].roomNo;
-        });
-        oldRoomStatus = arr;
-    }
-    const newRoomStatus = [...arr, ...reqRoomStatus];
-    await roomModel.findByIdAndUpdate(roomId, { roomStatus: newRoomStatus }, { new: true });
+    const updatedRoomStatus = roomStatus.map((status) => {
+        if (status.roomNo && status.bookedDate && booking.roomNo.includes(status.roomNo)) {
+            const newBookedDate = status.bookedDate.filter((date) => !bookedDates.includes(date));
+            return {
+                roomNo: status.roomNo,
+                bookedDate: newBookedDate,
+                _id: status.roomNo,
+            };
+        } else {
+            return status;
+        }
+    });
+
+    await roomModel.findByIdAndUpdate(roomId, { roomStatus: updatedRoomStatus }, { new: true });
+    userNotificationModel.create({
+        userId: booking.userId,
+        image: room.cover,
+        message: `Bạn đã hủy yêu cầu đặt ${room.title} số ${booking.roomNo.toString()} thành công!`,
+    });
     res.send("Hủy đặt phòng thành công!");
 };
+
 const roomDelivery = async (req, res) => {
     const bookingId = req.params.id;
+    const booking = await bookingModel.findById(bookingId);
+    const room = await roomModel.findById(booking.roomId);
     await bookingModel.findByIdAndUpdate(bookingId, { isReceived: true });
+    userNotificationModel.create({
+        userId: booking.userId,
+        image: room.cover,
+        message: `Bạn đã nhận ${room.title} số ${booking.roomNo.toString()} thành công!`,
+    });
+    const user = await userModel.findOne({ _id: booking.userId });
+    const socketId = user.socketId;
+    const io = getIO(); // Lấy đối tượng io
+    io.to(socketId).emit(
+        "deliverySuccessfully",
+        `Bạn đã nhận ${room.title} số ${booking.roomNo.toString()} thành công!`
+    );
+    io.to(socketId).emit("notification");
     res.send("Giao phòng thành công!");
 };
 const getBookingDetail = async (req, res) => {

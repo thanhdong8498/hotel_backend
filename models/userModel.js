@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema({
     phone: String,
     password: String,
     role: String,
+    verified: { type: Boolean, default: false },
+    socketId: { type: String, default: null },
 });
 
 // Compiler
