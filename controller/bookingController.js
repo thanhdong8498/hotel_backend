@@ -114,6 +114,15 @@ const checkOutBookings = async (req, res) => {
         image: room.cover,
         message: `Bạn đã trả ${room.title} số ${booking.roomNo.toString()} thành công!`,
     });
+    const user = await userModel.findOne({ _id: booking.userId });
+    const socketId = user.socketId;
+    const io = getIO(); // Lấy đối tượng io
+    io.to(socketId).emit(
+        "checkoutSuccessfully",
+        `Bạn đã trả ${room.title} số ${booking.roomNo.toString()} thành công!`
+    );
+    io.to(socketId).emit("notification");
+
     res.send("Trả phòng thành công!");
 };
 

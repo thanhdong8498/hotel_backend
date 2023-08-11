@@ -1,4 +1,3 @@
-
 const socketIO = require("socket.io");
 const userModel = require("../models/userModel");
 
@@ -8,13 +7,12 @@ module.exports = {
     init: (httpServer) => {
         io = socketIO(httpServer, {
             cors: {
-                origin: "https://hotel-frontend-ntd.vercel.app",
+                origin: process.env.BASE_URL,
                 methods: ["GET", "POST"],
             },
         });
         io.on("connection", (socket) => {
             console.log("Kết nối với socket.io ", socket.id);
-
             socket.on("login", async (userId) => {
                 // Lưu socketId vào cơ sở dữ liệu (hoặc update nếu đã tồn tại)
                 // Ví dụ, sử dụng mongoose
