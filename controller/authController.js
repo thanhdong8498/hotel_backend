@@ -28,7 +28,7 @@ const register = async (req, res) => {
                 userId: user._id,
                 token: crypto.randomBytes(32).toString("hex"),
             }).save();
-            const url = `${process.env.BASE_URL}users/${user.id}/verify/${token.token}`;
+            const url = `${process.env.BASE_URL}/users/${user.id}/verify/${token.token}`;
             await sendEmail(user.email, "Verify Email", url);
 
             res.status(201).send({ message: "Một email xác thực đã được gửi đến email của bạn vui lòng xác thực!" });
@@ -80,7 +80,7 @@ const sendPasswordLink = async (req, res) => {
             }).save();
         }
 
-        const url = `${process.env.BASE_URL}password-reset/${user._id}/${token.token}/`;
+        const url = `${process.env.BASE_URL}/password-reset/${user._id}/${token.token}/`;
         await sendEmail(user.email, "Password Reset", url);
 
         res.status(200).send({ message: "Password reset link sent to your email account" });
@@ -133,7 +133,7 @@ const setNewPassword = async (req, res) => {
 
 const login = async (req, res) => {
     // check email,password
-    
+
     const user = await userModel.findOne({ email: req.body.email });
     if (!user) {
         return res.status(201).send("Email không tồn tại trên hệ thống!");
