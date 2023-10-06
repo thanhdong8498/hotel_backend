@@ -44,10 +44,17 @@ router.get(
     bookingController.getUserListBooking
 );
 router.get(
+    "/current/",
+    jsonParser,
+    urlencodedParser,
+    [authMiddleware.isAuthentication],
+    bookingController.getCurrentBooking
+);
+router.get(
     "/detail/:id",
     jsonParser,
     urlencodedParser,
-    [authMiddleware.isAuthentication, authMiddleware.isAdmin],
+    [authMiddleware.isAuthentication],
     bookingController.getBookingDetail
 );
 

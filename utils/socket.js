@@ -28,8 +28,6 @@ module.exports = {
                 }
             });
 
-            // Các sự kiện khác...
-
             socket.on("updateSocketId", async (userId) => {
                 try {
                     await userModel.findByIdAndUpdate(userId, { socketId: socket.id }, { new: true });
@@ -37,34 +35,6 @@ module.exports = {
                 } catch (error) {
                     console.error(error);
                 }
-            });
-
-            socket.on("ordered", () => {
-                io.emit("updateadminorder");
-            });
-            socket.on("booked", () => {
-                io.emit("updatedetail");
-            });
-            socket.on("deliveried", () => {
-                io.emit("updateuserorder");
-            });
-            socket.on("adminbookingcanceled", () => {
-                io.emit("updateuserbooking");
-            });
-            socket.on("checkedout", () => {
-                io.emit("updateuserbooking");
-            });
-            socket.on("roomdeliveried", () => {
-                io.emit("updateuserbooking");
-            });
-            socket.on("userbookingcancelled", () => {
-                io.emit("updatedetail");
-            });
-            socket.on("usercancelledorder", () => {
-                io.emit("updateadminorder");
-            });
-            socket.on("accept", () => {
-                io.emit("updateuserorder");
             });
 
             // Xử lý sự kiện ngắt kết nối

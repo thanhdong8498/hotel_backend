@@ -4,6 +4,7 @@ const userModel = require("../models/userModel");
 const userNotificationModel = require("../models/userNotificationModel");
 const moment = require("moment-timezone");
 const { getIO } = require("../utils/socket");
+const adminNotificationModel = require("../models/adminNotificationModel");
 
 function getDatesInRange(startDate, endDate) {
     const date = new Date(startDate.getTime());
@@ -20,7 +21,7 @@ const createBooking = async (req, res) => {
     room = await roomModel.findById(roomId);
 
     try {
-        bookingModel.create({
+        const newBooking = await bookingModel.create({
             fullname: req.body.fullname,
             phone: req.body.phone,
             receiveDate: req.body.receiveDate,
@@ -46,15 +47,32 @@ const createBooking = async (req, res) => {
         );
 
         await roomModel.findByIdAndUpdate(roomId, { roomStatus: oldRoomStatus }, { new: true });
+
         userNotificationModel.create({
             userId: req.userId,
             message: `Bạn đã gửi yêu cầu đặt ${room.title} số ${req.body.roomNo.toString()} thành công!`,
             image: room.cover,
         });
+
         const user = await userModel.findOne({ _id: req.userId });
+
+        adminNotificationModel.create({
+            message: `${user.lastName} ${user.firstName} đã gửi yêu cầu đặt ${
+                room.title
+            } số ${req.body.roomNo.toString()}!`,
+            image: room.cover,
+            target: "booking",
+        });
+
         const socketId = user.socketId;
         const io = getIO(); // Lấy đối tượng io
         io.to(socketId).emit("notification");
+        io.emit("adminnotification");
+        io.emit(
+            "adminAlert",
+            `${user.lastName} ${user.firstName} đã gửi yêu cầu đặt ${room.title} số ${req.body.roomNo.toString()}!`
+        );
+        io.emit("updatedeatail");
         return res.status(200).send("booking successfully!");
     } catch (error) {
         console.log(error);
@@ -63,7 +81,7 @@ const createBooking = async (req, res) => {
 
 const getListBookings = async (req, res) => {
     try {
-        const response = await bookingModel.find();
+        const response = await bookingModel.find().sort({ createdAt: -1 });
         res.send(response);
     } catch (error) {
         console.log(error);
@@ -76,7 +94,7 @@ const checkOutBookings = async (req, res) => {
         return res.status(404).send("Booking not found");
     }
 
-    await bookingModel.findByIdAndUpdate(bookingId, { isCheckedOut: true });
+    await bookingModel.findByIdAndUpdate(bookingId, { isCheckedOut: true }, { isPaid: true }, { new: true });
 
     const roomId = booking.roomId;
     const roomNo = booking.roomNo;
@@ -128,7 +146,7 @@ const checkOutBookings = async (req, res) => {
 
 const getUserListBooking = async (req, res) => {
     const userId = req.userId;
-    const userBooking = await bookingModel.find({ userId: userId });
+    const userBooking = await bookingModel.find({ userId: userId }).sort({ createdAt: -1 });
     res.send(userBooking);
 };
 const cancelledBooking = async (req, res) => {
@@ -162,13 +180,33 @@ const cancelledBooking = async (req, res) => {
             return status;
         }
     });
-
+    const user = await userModel.findById(booking.userId);
     await roomModel.findByIdAndUpdate(roomId, { roomStatus: updatedRoomStatus }, { new: true });
     userNotificationModel.create({
         userId: booking.userId,
         image: room.cover,
         message: `Bạn đã hủy yêu cầu đặt ${room.title} số ${booking.roomNo.toString()} thành công!`,
     });
+    adminNotificationModel.create({
+        message: `${user.lastName} ${user.firstName} đã hủy yêu cầu đặt ${room.title} số ${booking.roomNo.toString()}!`,
+        image: room.cover,
+        target: "booking",
+    });
+    const socketId = user.socketId;
+    const io = getIO(); // Lấy đối tượng io
+    io.emit(
+        "adminAlert",
+        `${user.lastName} ${user.firstName} đã hủy yêu cầu đặt ${room.title} số ${booking.roomNo.toString()}!`
+    );
+    io.to(socketId).emit(
+        "cancelSuccessfully",
+        `Bạn đã hủy yêu cầu đặt ${room.title} số ${booking.roomNo.toString()} thành công!`
+    );
+    io.to(socketId).emit("notification");
+    io.emit("adminnotification");
+
+    io.to(socketId).emit("updateuserbooking");
+    io.emit("updatedeatail");
     res.send("Hủy đặt phòng thành công!");
 };
 
@@ -190,6 +228,7 @@ const roomDelivery = async (req, res) => {
         `Bạn đã nhận ${room.title} số ${booking.roomNo.toString()} thành công!`
     );
     io.to(socketId).emit("notification");
+    io.emit("updateuserbooking");
     res.send("Giao phòng thành công!");
 };
 const getBookingDetail = async (req, res) => {
@@ -197,6 +236,12 @@ const getBookingDetail = async (req, res) => {
     const response = await bookingModel.findById(id);
     res.send(response);
 };
+
+const getCurrentBooking = async (req, res) => {
+    const currentBooking = await bookingModel.find({ isReceived: true, isCheckedOut: false });
+    res.send(currentBooking);
+};
+
 module.exports = {
     createBooking,
     getListBookings,
@@ -206,4 +251,5 @@ module.exports = {
     cancelledBooking,
     roomDelivery,
     getBookingDetail,
+    getCurrentBooking,
 };

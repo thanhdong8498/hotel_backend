@@ -24,6 +24,13 @@ router.put(
     orderController.acceptOrder
 );
 router.put(
+    "/deny/:id",
+    jsonParser,
+    urlencodedParser,
+    [authMiddleware.isAuthentication, authMiddleware.isAdmin],
+    orderController.denyOrder
+);
+router.put(
     "/deliveried/:id",
     jsonParser,
     urlencodedParser,
@@ -36,6 +43,20 @@ router.put(
     urlencodedParser,
     [authMiddleware.isAuthentication],
     orderController.cancelOrder
+);
+router.get(
+    "/viaBooking/:id",
+    jsonParser,
+    urlencodedParser,
+    [authMiddleware.isAuthentication],
+    orderController.getOrderViaBooking
+);
+router.get(
+    "/detail/:id",
+    jsonParser,
+    urlencodedParser,
+    [authMiddleware.isAuthentication],
+    orderController.getOrderDetail
 );
 
 module.exports = router;

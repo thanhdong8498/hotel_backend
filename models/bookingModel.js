@@ -16,6 +16,7 @@ const bookingSchema = new mongoose.Schema(
         isCheckedOut: Boolean,
         isCancelled: Boolean,
         isReceived: Boolean,
+        isPaid: { type: Boolean, default: false },
     },
     { timestamps: true }
 );

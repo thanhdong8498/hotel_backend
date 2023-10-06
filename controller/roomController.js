@@ -149,7 +149,7 @@ const getRoomList = async (req, res) => {
     } else {
         sortBy[sort[0]] = "desc";
     }
-    
+
     try {
         const rooms = await roomModel.find().sort(sortBy);
         return res.status(200).send(rooms);

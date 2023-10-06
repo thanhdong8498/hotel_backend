@@ -11,6 +11,8 @@ const contactRoute = require("./router/contactRoute");
 const galleryRoute = require("./router/galleryRoute");
 const dashboardRoute = require("./router/dashboardRoute");
 const userNotificationRoute = require("./router/userNotificationRoute");
+const adminNotificationRoute = require("./router/adminNotificationRoute");
+const paymentRoute = require("./router/paymentRoute");
 const connectDb = require("./services/connectDBService");
 const cors = require("cors");
 
@@ -37,6 +39,8 @@ app.use("/api/contact", contactRoute);
 app.use("/api/gallery", galleryRoute);
 app.use("/api/dashboard", dashboardRoute);
 app.use("/api/userNotification", userNotificationRoute);
+app.use("/api/adminNotification", adminNotificationRoute);
+app.use("/api/payment", paymentRoute);
 
 const httpServer = require("http").createServer(app);
 const io = socketSetup.init(httpServer);

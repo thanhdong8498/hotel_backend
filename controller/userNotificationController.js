@@ -3,15 +3,26 @@ const userNotificationModel = require("../models/userNotificationModel");
 const { getIO } = require("../utils/socket");
 // Get list of all notification belong to userId
 const getListOfNotifications = async (req, res) => {
-    const userId = req.userId;
-    const notifications = await userNotificationModel.find({ userId: userId });
-    res.status(200).send(notifications);
+    try {
+        const userId = req.userId;
+        const notifications = await userNotificationModel.find({ userId: userId }).sort({ createdAt: -1 });
+        res.status(200).send(notifications);
+    } catch (error) {
+        // Xử lý lỗi nếu có
+        res.status(500).send("Đã xảy ra lỗi trong quá trình truy vấn thông báo.");
+    }
 };
 
 const getListOfUnreadNotifications = async (req, res) => {
-    const userId = req.userId;
-    const notifications = await userNotificationModel.find({ userId: userId, isRead: false });
-    res.status(200).send(notifications);
+    try {
+        const userId = req.userId;
+        const notifications = await userNotificationModel
+            .find({ userId: userId, isRead: false })
+            .sort({ createdAt: -1 });
+        res.status(200).send(notifications);
+    } catch (error) {
+        res.status(500).send("Đã xảy ra lỗi trong quá trình truy vấn thông báo.");
+    }
 };
 
 const MarkAsRead = async (req, res) => {
